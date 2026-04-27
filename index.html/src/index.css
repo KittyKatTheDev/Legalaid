@@ -1,0 +1,28 @@
+@import "tailwindcss";
+
+@theme {
+  --color-navy: #1F3A5F;
+  --color-gold: #D4A64A;
+  --color-lightblue: #AFC6D9;
+  --color-cream: #F9F7F2;
+  --color-deep-navy: #0F1D30;
+  
+  --font-sans: "Inter", system-ui, -apple-system, sans-serif;
+  
+  --radius-2xl: 1.25rem;
+  --radius-3xl: 1.75rem;
+
+  --shadow-premium: 0 10px 40px -10px rgba(31, 58, 95, 0.1);
+}
+
+@layer base {
+  body {
+    @apply bg-cream text-navy antialiased selection:bg-gold/30;
+    background-image: radial-gradient(rgba(31, 58, 95, 0.03) 1px, transparent 1px);
+    background-size: 24px 24px;
+  }
+}
+
+.glass-pill {
+  @apply bg-white/80 backdrop-blur-md border border-white shadow-sm;
+}
