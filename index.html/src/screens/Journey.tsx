@@ -88,7 +88,7 @@ export const Timeline: React.FC<ScreenProps> = ({ onNext, onBack, user, updateUs
 
         <Card className="bg-navy text-white text-center p-8 space-y-2">
            <span className="text-gold font-bold uppercase tracking-widest text-[10px]">{t('timeline.duration.label', lang)}</span>
-           <h3 className="text-4xl font-black">{t('timeline.duration.value', lang)}</h3>
+           <h3 className="text-4xl font-black">{user.estimatedTimeline || t('timeline.duration.value', lang)}</h3>
            <p className="text-white/40 text-xs">{t('timeline.duration.stats', lang)}</p>
         </Card>
 

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Button, Card, Layout, ProgressBar, Modal, Badge } from '../components/Common';
+import { Button, Card, Layout, ProgressBar, Modal, Badge, TTSButton } from '../components/Common';
 import { ScreenId, UserData } from '../types';
 import { Info, Mic, ChevronRight, AlertCircle, TrendingDown, Clock, MicOff, Sparkles } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
@@ -17,6 +17,7 @@ export const Intake: React.FC<ScreenProps> = ({ onNext, onBack, user, updateUser
   const [step, setStep] = useState(0);
   const [showExplanation, setShowExplanation] = useState(false);
   const [voiceTranscript, setVoiceTranscript] = useState("");
+  const [selectedOption, setSelectedOption] = useState<string | null>(null);
   const lang = user.language;
   
   const { isListening, toggle, transcript, error: voiceError } = useVoiceInput({
@@ -29,6 +30,7 @@ export const Intake: React.FC<ScreenProps> = ({ onNext, onBack, user, updateUser
         opt.toLowerCase().includes(text.toLowerCase())
       );
       if (match) {
+        setSelectedOption(match);
         setVoiceTranscript(`${t('voice.recognized', lang)}"${match}"`);
         setTimeout(() => {
           handleContinue();
@@ -42,6 +44,7 @@ export const Intake: React.FC<ScreenProps> = ({ onNext, onBack, user, updateUser
   });
 
   const questions = [
+    // ... same as before
     {
       q: t('intake.q1', lang),
       helper: t('intake.q1_helper', lang),
@@ -72,10 +75,45 @@ export const Intake: React.FC<ScreenProps> = ({ onNext, onBack, user, updateUser
         t('intake.q3_opt3', lang),
         t('intake.q3_opt4', lang)
       ]
+    },
+    {
+      q: t('intake.q4', lang),
+      helper: t('intake.q4_helper', lang),
+      options: [
+        t('intake.q4_opt1', lang),
+        t('intake.q4_opt2', lang),
+        t('intake.q4_opt3', lang),
+        t('intake.q4_opt4', lang),
+        t('intake.q4_opt5', lang)
+      ]
     }
   ];
 
-  const handleContinue = () => {
+  const handleContinue = (option?: string) => {
+    const finalOption = option || selectedOption;
+    if (!finalOption) return;
+
+    if (step === 3) { // Q4 is the last step now
+      const isComplex = finalOption !== t('intake.q4_opt1', lang);
+      const isRenewal = user.caseType.includes('Renewals') || user.caseType === t('case.renewals', lang);
+      
+      let timeline = '12-18 months';
+      const ct = user.caseType;
+      if (ct.includes('Citizenship') || ct === t('case.naturalization', lang)) timeline = '6-12 months';
+      else if (ct.includes('Green Card') || ct === t('case.greencard', lang)) timeline = '10-24 months';
+      else if (ct.includes('Work Permit') || ct === t('case.workpermit', lang)) timeline = '3-7 months';
+      else if (ct.includes('Asylum') || ct === t('case.asylum', lang)) timeline = '24-48 months';
+      else if (ct.includes('Family') || ct === t('case.family', lang)) timeline = '12-36 months';
+      else if (isRenewal) timeline = '8-14 months';
+
+      updateUser({
+        complexity: isComplex ? 'High' : 'Low',
+        estimatedTimeline: timeline,
+        caseFactors: [finalOption]
+      });
+    }
+
+    setSelectedOption(null);
     if (step < questions.length - 1) {
       setStep(step + 1);
     } else {
@@ -85,7 +123,7 @@ export const Intake: React.FC<ScreenProps> = ({ onNext, onBack, user, updateUser
 
   return (
     <Layout 
-      onBack={step === 0 ? onBack : () => setStep(step - 1)} 
+      onBack={step === 0 ? onBack : () => { setSelectedOption(null); setStep(step - 1); }} 
       title={t('intake.title', lang)}
       user={user}
       updateUser={updateUser}
@@ -93,7 +131,13 @@ export const Intake: React.FC<ScreenProps> = ({ onNext, onBack, user, updateUser
       <div className="space-y-6 py-4">
         <div className="space-y-4">
           <ProgressBar progress={((step + 1) / questions.length) * 100} />
-          <h2 className="text-2xl font-bold text-navy leading-tight">{questions[step].q}</h2>
+          <div className="flex items-center gap-3">
+             <div className="w-8 h-8 bg-gold/10 rounded-full flex items-center justify-center text-gold font-bold text-xs shrink-0">
+               {step + 1}
+             </div>
+             <h2 className="text-xl font-bold text-navy leading-tight flex-1">{questions[step].q}</h2>
+             <TTSButton text={questions[step].q} lang={lang} />
+          </div>
         </div>
 
         {voiceError && (
@@ -109,9 +153,21 @@ export const Intake: React.FC<ScreenProps> = ({ onNext, onBack, user, updateUser
 
         <div className="space-y-3">
           {questions[step].options.map((opt) => (
-            <Card key={opt} onClick={handleContinue} className="p-4 flex items-center justify-between group">
-              <span className="font-medium text-navy">{opt}</span>
-              <ChevronRight className="w-5 h-5 text-navy/20 group-hover:text-navy" />
+            <Card 
+              key={opt} 
+              onClick={() => { setSelectedOption(opt); handleContinue(opt); }} 
+              className={`p-4 flex items-center justify-between transition-all ${selectedOption === opt ? 'border-gold bg-gold/5 shadow-md shadow-gold/10 ring-2 ring-gold/20' : 'hover:border-navy/20'}`}
+            >
+              <div className="flex items-center gap-3 flex-1">
+                <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0 ${selectedOption === opt ? 'border-gold bg-gold' : 'border-navy/10'}`}>
+                  {selectedOption === opt && <div className="w-2 h-2 bg-white rounded-full" />}
+                </div>
+                <span className={`font-bold text-sm ${selectedOption === opt ? 'text-navy' : 'text-navy/70'}`}>{opt}</span>
+              </div>
+              <div className="flex items-center gap-3">
+                <TTSButton text={opt} lang={lang} />
+                <ChevronRight className={`w-4 h-4 transition-colors ${selectedOption === opt ? 'text-gold' : 'text-navy/20'}`} />
+              </div>
             </Card>
           ))}
         </div>
@@ -187,47 +243,119 @@ export const Intake: React.FC<ScreenProps> = ({ onNext, onBack, user, updateUser
 
 export const CaseSummary: React.FC<ScreenProps> = ({ onNext, onBack, user, updateUser }) => {
   const lang = user.language;
+  const isHigh = user.complexity === 'High';
   return (
-    <Layout onBack={onBack} title={t('summary.title', lang)} user={user} updateUser={updateUser}>
-      <div className="space-y-8 py-4">
-        <div className="space-y-2">
-          <h2 className="text-2xl font-bold text-navy">{t('summary.header', lang)}</h2>
-          <p className="text-navy/60">{t('summary.subheader', lang)} ({user.caseType})</p>
-        </div>
-
-        <Card className="space-y-4 bg-navy text-white border-transparent">
-          <div className="flex items-center justify-between">
-            <span className="text-navy-100 text-sm">{t('summary.case_type', lang)}</span>
-            <Badge>{user.caseType}</Badge>
-          </div>
-          <div className="flex items-center justify-between">
-             <span className="text-navy-100 text-sm">{t('summary.complexity', lang)}</span>
-             <div className="flex items-center gap-1.5 text-gold">
-                <TrendingDown className="w-4 h-4" />
-                <span className="font-bold">{t('summary.complexity_low', lang)}</span>
-             </div>
-          </div>
-          <div className="flex items-center gap-2 pt-2 text-xs text-white/60">
-             <Clock className="w-3 h-3" /> {t('summary.est_process', lang)}
-          </div>
-        </Card>
-
-        <div className="space-y-6 py-4 border-t border-navy/5">
-           <div className="flex items-start gap-4">
-              <div className="p-3 bg-gold/10 rounded-xl">
-                 <AlertCircle className="w-6 h-6 text-gold" />
+    <Layout onBack={onBack} user={user} updateUser={updateUser}>
+      <div className="max-w-4xl mx-auto space-y-12">
+        
+        <div className="flex flex-col md:flex-row justify-between items-end gap-8 border-b border-navy/5 pb-10">
+           <div className="space-y-4">
+              <div className="inline-flex items-center gap-2 px-3 py-1 bg-gold/10 rounded-full">
+                 <Sparkles className="w-3 h-3 text-gold" />
+                 <span className="text-[10px] font-black uppercase tracking-widest text-gold">{lang === 'es' ? 'Análisis de Caso' : 'Case Analysis'}</span>
               </div>
-              <div className="space-y-1">
-                 <h4 className="font-bold text-navy">{t('summary.recommendation', lang)}</h4>
-                 <p className="text-sm text-navy/60">{t('summary.recommendation_desc', lang)}</p>
+              <h1 className="text-5xl font-black text-navy uppercase tracking-tighter leading-none">{t('summary.header', lang)}</h1>
+              <p className="text-xl text-navy/40 font-medium italic lowercase">{t('summary.subheader', lang)} ({user.caseType})</p>
+           </div>
+           <div className="bg-navy p-6 rounded-2xl text-white flex items-center gap-4 shadow-xl">
+              <Clock className="w-6 h-6 text-gold" />
+              <div>
+                 <p className="text-[8px] font-black uppercase tracking-widest text-white/40">{lang === 'es' ? 'Tiempo Estimado' : 'Estimated Time'}</p>
+                 <p className="text-lg font-black tracking-tighter uppercase">{user.estimatedTimeline || '8-14 months'}</p>
               </div>
            </div>
         </div>
 
-        <div className="space-y-4">
-           <Button fullWidth onClick={() => onNext('DASHBOARD')}>{t('btn.continue', lang)}</Button>
-           <Button variant="secondary" fullWidth onClick={() => onNext('PREMIUM')}>{t('dash.upgrade_btn', lang)}</Button>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
+           <div className="md:col-span-2 space-y-8">
+              <Card className="p-8 space-y-8 bg-white border-navy/5 shadow-premium">
+                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <div className="space-y-2">
+                       <label className="text-[10px] font-black uppercase tracking-widest text-navy/20">{t('summary.case_type', lang)}</label>
+                       <p className="text-xl font-bold text-navy uppercase tracking-tight">{user.caseType}</p>
+                    </div>
+                    <div className="space-y-2">
+                       <label className="text-[10px] font-black uppercase tracking-widest text-navy/20">{t('summary.complexity', lang)}</label>
+                       <div className="flex items-center gap-3">
+                          <div className={`w-3 h-3 rounded-full ${isHigh ? 'bg-red-500 animate-pulse' : 'bg-green-500'}`} />
+                          <p className={`text-xl font-black uppercase tracking-widest ${isHigh ? 'text-red-500' : 'text-green-600'}`}>
+                             {isHigh ? t('summary.complexity_high', lang) : t('summary.complexity_low', lang)}
+                          </p>
+                       </div>
+                    </div>
+                 </div>
+
+                 {user.caseFactors && user.caseFactors.length > 0 && (
+                    <div className="pt-8 border-t border-navy/5 space-y-4">
+                       <h4 className="text-[10px] font-black uppercase tracking-[0.2em] text-navy/30">{t('summary.factors_title', lang)}</h4>
+                       <div className="flex flex-wrap gap-2">
+                          {user.caseFactors.map(f => (
+                             <Badge key={f} variant="outline" className="text-navy/60 border-navy/10 py-1.5 px-4 rounded-xl italic font-bold">
+                                {f}
+                             </Badge>
+                          ))}
+                       </div>
+                    </div>
+                 )}
+              </Card>
+
+              <div className="p-10 rounded-[3rem] bg-navy text-white space-y-6 relative overflow-hidden shadow-2xl">
+                 <div className="absolute top-0 right-0 w-64 h-64 bg-gold/5 rounded-full -mr-32 -mt-32 blur-3xl" />
+                 <div className="flex items-center gap-4 relative z-10">
+                    <div className="p-3 bg-white/10 rounded-2xl">
+                       {isHigh ? <TrendingDown className="w-6 h-6 text-red-400 rotate-180" /> : <TrendingDown className="w-6 h-6 text-green-400" />}
+                    </div>
+                    <div>
+                       <h3 className="text-2xl font-black uppercase tracking-tighter">{t('summary.recommendation', lang)}</h3>
+                       <p className="text-xs text-white/40 font-bold uppercase tracking-widest">{lang === 'es' ? 'Plan de Acción Sugerido' : 'Suggested Action Plan'}</p>
+                    </div>
+                 </div>
+                 
+                 <p className="text-lg font-medium italic leading-relaxed text-white/80 relative z-10">
+                    {isHigh ? t('summary.complex_advisor_msg', lang) : t('summary.low_tip', lang)}
+                 </p>
+
+                 <div className="pt-6 relative z-10">
+                    <Button 
+                       fullWidth 
+                       size="lg" 
+                       onClick={() => onNext(isHigh ? 'PREMIUM' : 'DASHBOARD')}
+                       className={`${isHigh ? 'bg-red-500 hover:bg-red-600 shadow-red-500/20' : 'bg-gold hover:bg-gold-light'} h-16 rounded-2xl shadow-xl text-lg font-black uppercase tracking-widest transform hover:scale-[1.02] transition-all`}
+                    >
+                       {isHigh ? t('summary.btn_lawyer', lang) : t('summary.btn_advisor', lang)}
+                    </Button>
+                 </div>
+              </div>
+           </div>
+
+           <div className="space-y-6">
+              <Card className="p-8 space-y-6 bg-[#F8F9FA] border-navy/5">
+                 <h4 className="text-[10px] font-black uppercase tracking-[0.2em] text-navy/30">{lang === 'es' ? 'Próximos Pasos' : 'Next Steps'}</h4>
+                 <div className="space-y-4">
+                    {[1, 2, 3].map(i => (
+                       <div key={i} className="flex gap-4 items-center">
+                          <div className="w-6 h-6 rounded-full bg-navy/5 flex items-center justify-center text-[10px] font-black text-navy/20">
+                             {i}
+                          </div>
+                          <span className="text-xs font-bold text-navy/60 uppercase tracking-tight">
+                             {t(`roadmap.step${i}.title` as any, lang)}
+                          </span>
+                       </div>
+                    ))}
+                 </div>
+              </Card>
+
+              <div className="p-8 space-y-4 border-2 border-dashed border-navy/5 rounded-3xl">
+                 <p className="text-[10px] text-navy/30 italic leading-relaxed">
+                    * {lang === 'es' ? 'La línea de tiempo es una estimación basada en promedios del gobierno.' : 'The timeline is an estimate based on government averages.'}
+                 </p>
+                 <Button variant="ghost" fullWidth className="text-[10px] font-black uppercase tracking-widest text-navy/40" onClick={() => onNext('DASHBOARD')}>
+                    {t('btn.continue', lang)}
+                 </Button>
+              </div>
+           </div>
         </div>
+
       </div>
     </Layout>
   );

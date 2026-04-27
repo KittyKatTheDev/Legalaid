@@ -1,6 +1,6 @@
 {
   "name": "Legal Aid – Bridge AI",
-  "description": "Guided immigration assistance for families. Simple, bilingual, and supportive legal aid app.",
+  "description": "Guided immigration assistance for families. Simple, bilingual, and supportive legal aid service and platform.",
   "requestFramePermissions": ["microphone"],
   "majorCapabilities": []
 }
