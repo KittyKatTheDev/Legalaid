@@ -68,7 +68,6 @@ export default function App() {
     caseType: 'Citizenship / Naturalization',
     isPremium: false,
     progress: 65,
-    isLoggedIn: false,
   });
 
   const [history, setHistory] = useState<ScreenId[]>([]);
@@ -109,11 +108,9 @@ export default function App() {
       case 'CHECKLIST': return <Checklist {...props} />;
       case 'UPLOAD': return <DocumentUpload {...props} />;
       case 'REVIEW': return <ReviewExtraction {...props} />;
-      case 'ROADMAP': 
-      case 'JOURNEY': return <Roadmap {...props} />;
+      case 'ROADMAP': return <Roadmap {...props} />;
       case 'TIMELINE': return <Timeline {...props} />;
-      case 'AI_ASSISTANT': 
-      case 'TOOLS': return <AIAssistant {...props} />;
+      case 'AI_ASSISTANT': return <AIAssistant {...props} />;
       case 'WHATSAPP': return <WhatsAppConnect {...props} />;
       case 'FAMILY': return <FamilyMode {...props} />;
       case 'NEXT_STEPS': return <NextSteps {...props} />;
@@ -128,6 +125,7 @@ export default function App() {
       case 'PROGRESS_SCORE': return <FeaturePlaceholder {...props} title={t('feature.progress_score', user.language)} />;
       case 'SMART_ALERTS': return <FeaturePlaceholder {...props} title={t('feature.smart_alerts', user.language)} />;
       case 'VOICE_INPUT': return <FeaturePlaceholder {...props} title={t('feature.voice_input', user.language)} />;
+      case 'CHECKLIST': return <FeaturePlaceholder {...props} title={t('feature.smart_checklist', user.language)} />;
       case 'ELIGIBILITY_CHECK': return <FeaturePlaceholder {...props} title={t('feature.eligibility_check', user.language)} />;
       case 'LAWYER_AI': return <FeaturePlaceholder {...props} title={t('feature.lawyer_ai', user.language)} />;
       default: return <Landing {...props} />;

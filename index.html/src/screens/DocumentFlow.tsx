@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Button, Card, Layout, Badge } from '../components/Common';
 import { ScreenId, UserData } from '../types';
-import { CheckCircle2, Upload, Camera, AlertCircle, Trash2, Edit2, Check, ShieldCheck, Sparkles, ListChecks, Plus, Search, Scan } from 'lucide-react';
+import { CheckCircle2, Upload, Camera, AlertCircle, Trash2, Edit2, Check, ShieldCheck, Sparkles } from 'lucide-react';
 import { motion } from 'motion/react';
 import { t } from '../lib/translations';
 
@@ -16,79 +16,47 @@ export const Checklist: React.FC<ScreenProps> = ({ onNext, onBack, user, updateU
   const lang = user.language;
   const items = [
     { name: t('checklist.item1', lang), status: 'complete' },
-    { name: t('checklist.item2', lang), status: 'missing', id: 'UPLOAD' },
+    { name: t('checklist.item2', lang), status: 'missing' },
     { name: t('checklist.item3', lang), status: 'review' },
-    { name: t('checklist.item4', lang), status: 'missing', id: 'UPLOAD' },
+    { name: t('checklist.item4', lang), status: 'missing' },
   ];
 
   return (
-    <Layout onBack={onBack} user={user} updateUser={updateUser}>
-      <div className="max-w-4xl mx-auto space-y-12">
-        <div className="flex flex-col md:flex-row justify-between items-end gap-8 border-b border-navy/5 pb-10">
-           <div className="space-y-4">
-              <div className="inline-flex items-center gap-2 px-3 py-1 bg-gold/10 rounded-full">
-                 <ListChecks className="w-3 h-3 text-gold" />
-                 <span className="text-[10px] font-black uppercase tracking-widest text-gold">{lang === 'es' ? 'Documentación Requerida' : 'Required Documentation'}</span>
-              </div>
-              <h1 className="text-5xl font-black text-navy uppercase tracking-tighter leading-none">{t('checklist.title', lang)}</h1>
-              <p className="text-xl text-navy/40 font-medium italic lowercase">{t('checklist.subtitle', lang)}</p>
-           </div>
-           <div className="text-right">
-              <p className="text-[10px] font-black uppercase tracking-widest text-navy/20 mb-1">{lang === 'es' ? 'Estado General' : 'Overall Status'}</p>
-              <Badge variant="outline" className="text-navy/60 border-navy/10 font-black uppercase tracking-widest">
-                 {items.filter(i => i.status === 'complete').length} / {items.length} {lang === 'es' ? 'Completado' : 'Completed'}
-              </Badge>
-           </div>
+    <Layout onBack={onBack} title={t('checklist.title', lang)} user={user} updateUser={updateUser}>
+      <div className="space-y-6 py-4">
+        <div className="space-y-2">
+          <h2 className="text-2xl font-bold text-navy">{t('checklist.subtitle', lang)}</h2>
+          <p className="text-navy/60 text-sm">{t('checklist.desc', lang)}</p>
         </div>
 
-        <div className="grid grid-cols-1 gap-6">
-          {items.map((item, i) => (
-            <Card key={i} className="p-8 flex items-center justify-between hover:bg-gold/5 transition-colors group">
-              <div className="flex items-center gap-6">
-                <div className={`w-14 h-14 rounded-2xl flex items-center justify-center transition-all ${
-                  item.status === 'complete' ? 'bg-green-500 text-white shadow-lg shadow-green-200' : 
-                  item.status === 'review' ? 'bg-amber-500 text-white shadow-lg shadow-amber-200' : 
-                  'bg-navy/5 text-navy/20 border-2 border-dashed border-navy/10'
-                }`}>
-                  {item.status === 'complete' ? <CheckCircle2 className="w-6 h-6" /> : 
-                   item.status === 'review' ? <AlertCircle className="w-6 h-6" /> : 
-                   <div className="text-xs font-black">{i + 1}</div>}
-                </div>
-                <div className="space-y-1">
-                  <h4 className="text-xl font-black text-navy uppercase tracking-tighter">{item.name}</h4>
-                  <p className={`text-[10px] uppercase font-black tracking-[0.2em] ${
-                    item.status === 'complete' ? 'text-green-500' : 
-                    item.status === 'review' ? 'text-amber-500' : 
-                    'text-navy/30'
-                  }`}>
-                    {item.status === 'complete' ? t('checklist.status_complete', lang) : 
-                     item.status === 'review' ? t('checklist.status_review', lang) : 
-                     t('checklist.status_missing', lang)}
+        <div className="space-y-3">
+          {items.map((item) => (
+            <Card key={item.name} className="p-4 flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                {item.status === 'complete' ? (
+                  <div className="bg-green-100 p-1.5 rounded-full"><CheckCircle2 className="w-5 h-5 text-green-600" /></div>
+                ) : item.status === 'review' ? (
+                  <div className="bg-amber-100 p-1.5 rounded-full"><AlertCircle className="w-5 h-5 text-amber-600" /></div>
+                ) : (
+                  <div className="bg-navy/5 p-1.5 rounded-full w-8 h-8 border border-navy/10" />
+                )}
+                <div>
+                  <span className="font-bold text-navy text-sm">{item.name}</span>
+                  <p className={`text-[10px] uppercase font-bold tracking-wider ${item.status === 'complete' ? 'text-green-600' : item.status === 'review' ? 'text-amber-600' : 'text-navy/30'}`}>
+                    {item.status === 'complete' ? t('checklist.status_complete', lang) : item.status === 'review' ? t('checklist.status_review', lang) : t('checklist.status_missing', lang)}
                   </p>
                 </div>
               </div>
-              
-              {item.status !== 'complete' && (
-                <Button 
-                  variant={item.status === 'missing' ? 'primary' : 'outline'}
-                  size="sm" 
-                  onClick={() => onNext('UPLOAD')} 
-                  className="px-8 rounded-xl font-black uppercase tracking-widest text-[10px]"
-                >
-                  {item.status === 'missing' ? t('checklist.btn_upload', lang) : (lang === 'es' ? 'Ver Detalles' : 'View Details')}
-                </Button>
+              {item.status === 'missing' && (
+                <Button variant="ghost" size="sm" onClick={() => onNext('UPLOAD')} className="text-gold">{t('checklist.status_missing', lang)}</Button>
               )}
             </Card>
           ))}
         </div>
 
-        <div className="pt-12 border-t border-navy/5 flex gap-4">
-           <Button variant="outline" className="px-12 py-4 rounded-2xl border-navy/10 text-navy/40 uppercase tracking-widest font-black text-xs" onClick={onBack}>
-              {t('nav.back', lang)}
-           </Button>
-           <Button className="flex-1 py-4 rounded-2xl text-lg font-black uppercase tracking-widest shadow-premium" onClick={() => onNext('UPLOAD')}>
-              <Plus className="w-5 h-5 mr-3" /> {t('checklist.btn_upload', lang)}
-           </Button>
+        <div className="pt-4 space-y-4">
+          <Button fullWidth onClick={() => onNext('UPLOAD')}>{t('checklist.btn_upload', lang)}</Button>
+          <Button variant="outline" fullWidth onClick={onBack}>{t('nav.back', lang)}</Button>
         </div>
       </div>
     </Layout>
@@ -103,88 +71,59 @@ export const DocumentUpload: React.FC<ScreenProps> = ({ onNext, onBack, user, up
   const docTypes = ['Green Card', 'Passport', 'Work Permit', 'Driver\'s License'];
 
   return (
-    <Layout onBack={onBack} user={user} updateUser={updateUser}>
-      <div className="max-w-4xl mx-auto space-y-16">
-        
-        <div className="flex flex-col md:flex-row justify-between items-end gap-8 border-b border-navy/5 pb-10">
-           <div className="space-y-4">
-              <div className="inline-flex items-center gap-2 px-3 py-1 bg-gold/10 rounded-full">
-                 <Upload className="w-3 h-3 text-gold" />
-                 <span className="text-[10px] font-black uppercase tracking-widest text-gold">{lang === 'es' ? 'Portal de Carga' : 'Upload Portal'}</span>
-              </div>
-              <h1 className="text-5xl font-black text-navy uppercase tracking-tighter leading-none">{t('upload.title', lang)}</h1>
-              <p className="text-xl text-navy/40 font-medium italic lowercase">{t('upload.desc', lang)}</p>
-           </div>
-           <div className="flex items-center gap-4 p-4 bg-navy/[0.02] border border-navy/5 rounded-2xl">
-              <ShieldCheck className="w-5 h-5 text-navy/20" />
-              <span className="text-[10px] font-black uppercase tracking-widest text-navy/40">{lang === 'es' ? 'Cifrado de 256 bits' : '256-bit Encryption'}</span>
-           </div>
+    <Layout onBack={onBack} title={t('upload.title', lang)} user={user} updateUser={updateUser}>
+      <div className="space-y-8 py-4">
+        <div className="space-y-2 text-center">
+          <h2 className="text-2xl font-bold text-navy">{t('upload.header', lang)}</h2>
+          <p className="text-navy/60">{t('upload.desc', lang)}</p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
-           <div className="md:col-span-1 space-y-8">
-              <div className="space-y-4">
-                 <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-navy/30">{t('upload.type_label', lang)}</h3>
-                 <div className="grid grid-cols-1 gap-3">
-                    {docTypes.map(type => (
-                      <button 
-                        key={type}
-                        onClick={() => setDocType(type)}
-                        className={`w-full p-5 rounded-2xl border-2 text-left transition-all ${
-                          docType === type ? 'bg-navy text-white border-navy shadow-lg' : 'bg-white text-navy border-navy/5 hover:border-navy/20'
-                        }`}
-                      >
-                         <p className="text-xs font-black uppercase tracking-widest">{type}</p>
-                         <p className="text-[10px] opacity-40 font-bold uppercase">{lang === 'es' ? 'Requerido' : 'Required'}</p>
-                      </button>
-                    ))}
-                 </div>
-              </div>
+        <div className="space-y-3">
+          <label className="text-[10px] font-black uppercase tracking-widest text-navy/30">{t('upload.type_label', lang)}</label>
+          <div className="grid grid-cols-2 gap-2">
+            {docTypes.map(type => (
+              <button 
+                key={type}
+                onClick={() => setDocType(type)}
+                className={`p-3 rounded-xl border text-xs font-bold transition-all ${docType === type ? 'bg-navy text-white border-navy' : 'bg-white text-navy border-navy/10 hover:border-navy/30'}`}
+              >
+                {type}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 gap-4">
+          <Button size="lg" className="h-40 flex flex-col gap-3 rounded-3xl" onClick={() => onNext('REVIEW')}>
+             <Upload className="w-8 h-8" />
+             <span>{t('upload.storage_btn', lang)} ({docType})</span>
+          </Button>
+          <Button variant="outline" size="lg" className="h-40 flex flex-col gap-3 rounded-3xl" onClick={() => onNext('REVIEW')}>
+             <Camera className="w-8 h-8" />
+             <span>{t('upload.camera_btn', lang)}</span>
+          </Button>
+        </div>
+
+        <Card className="bg-navy/5 border-navy/10">
+           <div className="flex items-center gap-4">
+              <ShieldCheck className="w-6 h-6 text-navy/40" />
+              <p className="text-xs text-navy/60 leading-relaxed font-medium">
+                {t('upload.privacy_note', lang)}
+              </p>
            </div>
+        </Card>
 
-           <div className="md:col-span-2 space-y-8">
-              <div className="grid grid-cols-1 gap-6">
-                 <button 
-                  onClick={() => onNext('REVIEW')}
-                  className="w-full h-72 border-4 border-dashed border-navy/10 rounded-[3rem] flex flex-col items-center justify-center gap-6 hover:border-gold/30 hover:bg-gold/5 transition-all group"
-                 >
-                    <div className="w-20 h-20 bg-navy text-white rounded-3xl flex items-center justify-center shadow-2xl group-hover:scale-110 transition-transform">
-                       <Upload className="w-8 h-8" />
-                    </div>
-                    <div className="text-center space-y-2">
-                       <h4 className="text-2xl font-black text-navy uppercase tracking-tighter">{t('upload.storage_btn', lang)}</h4>
-                       <p className="text-sm text-navy/40 font-medium italic">{lang === 'es' ? 'PDF, JPG o PNG hasta 10MB' : 'PDF, JPG or PNG up to 10MB'}</p>
-                    </div>
-                 </button>
-
-                 <div className="flex gap-6">
-                    <Card className="flex-1 p-8 bg-cream/30 border-navy/5 hover:border-navy/10 transition-all flex flex-col items-center gap-4 text-center cursor-pointer" onClick={() => onNext('REVIEW')}>
-                       <Camera className="w-8 h-8 text-navy/20" />
-                       <span className="text-[10px] font-black uppercase tracking-widest text-navy">{t('upload.camera_btn', lang)}</span>
-                    </Card>
-                    <Card className="flex-1 p-8 bg-cream/30 border-navy/5 hover:border-navy/10 transition-all flex flex-col items-center gap-4 text-center cursor-pointer">
-                       <Search className="w-8 h-8 text-navy/20" />
-                       <span className="text-[10px] font-black uppercase tracking-widest text-navy">{lang === 'es' ? 'Explorar Cloud' : 'Browse Cloud'}</span>
-                    </Card>
-                 </div>
-              </div>
-
-              <div className="flex items-center justify-between p-8 bg-navy text-white rounded-[2rem] shadow-premium">
-                 <div className="space-y-1">
-                    <span className="text-[10px] font-black uppercase tracking-widest text-gold">{t('upload.anonymous', lang)}</span>
-                    <p className="text-xs font-medium text-white/50 italic">{lang === 'es' ? 'No guardamos su identidad en nuestros servidores.' : 'We do not store your identity on our servers.'}</p>
-                 </div>
-                 <button 
-                  onClick={() => setUseAnonymous(!useAnonymous)}
-                  className={`w-14 h-7 rounded-full transition-colors relative ${useAnonymous ? 'bg-gold' : 'bg-white/10'}`}
-                 >
-                    <motion.div 
-                      animate={{ x: useAnonymous ? 30 : 4 }}
-                      className="absolute top-1 left-0 w-5 h-5 bg-white rounded-full shadow-lg"
-                    />
-                 </button>
-              </div>
-           </div>
+        <div className="flex items-center justify-between p-2">
+           <span className="text-sm font-bold text-navy">{t('upload.anonymous', lang)}</span>
+           <button 
+            onClick={() => setUseAnonymous(!useAnonymous)}
+            className={`w-12 h-6 rounded-full transition-colors relative ${useAnonymous ? 'bg-gold' : 'bg-navy/20'}`}
+           >
+              <motion.div 
+                animate={{ x: useAnonymous ? 24 : 4 }}
+                className="absolute top-1 left-0 w-4 h-4 bg-white rounded-full shadow-sm"
+              />
+           </button>
         </div>
       </div>
     </Layout>
@@ -211,31 +150,28 @@ export const ReviewExtraction: React.FC<ScreenProps> = ({ onNext, onBack, user, 
   ];
 
   const getConfidenceColor = (score: number) => {
-    if (score >= 95) return 'text-green-600 bg-green-50 px-2 py-1 rounded-md';
-    if (score >= 85) return 'text-amber-600 bg-amber-50 px-2 py-1 rounded-md';
-    return 'text-red-500 bg-red-50 px-2 py-1 rounded-md';
+    if (score >= 95) return 'text-green-600 bg-green-50 px-1.5 rounded-sm';
+    if (score >= 85) return 'text-amber-600 bg-amber-50 px-1.5 rounded-sm';
+    return 'text-red-500 bg-red-50 px-1.5 rounded-sm';
   };
 
   if (isScanning) {
     return (
       <Layout showHeader={false} user={user} updateUser={updateUser}>
-        <div className="flex flex-col items-center justify-center min-h-[85vh] space-y-12">
-           <div className="relative w-80 h-96 bg-white rounded-[3rem] shadow-premium border-2 border-navy/5 overflow-hidden">
+        <div className="flex flex-col items-center justify-center min-h-[80vh] space-y-8">
+           <div className="relative w-64 h-80 bg-navy/5 rounded-3xl border-2 border-dashed border-navy/20 overflow-hidden">
               <motion.div 
-                animate={{ y: [0, 400, 0] }}
-                transition={{ repeat: Infinity, duration: 2.5, ease: "linear" }}
-                className="absolute top-0 left-0 w-full h-[2px] bg-gold shadow-[0_0_20px_rgba(212,166,74,0.8)] z-10"
+                animate={{ y: [0, 240, 0] }}
+                transition={{ repeat: Infinity, duration: 2, ease: "linear" }}
+                className="absolute top-0 left-0 w-full h-1 bg-gold shadow-[0_0_15px_rgba(212,166,74,1)] z-10"
               />
-              <div className="absolute inset-0 flex flex-col items-center justify-center gap-6 opacity-10">
-                 <Scan className="w-24 h-24 text-navy" />
+              <div className="absolute inset-0 flex items-center justify-center opacity-20">
+                 <Camera className="w-16 h-16 text-navy" />
               </div>
            </div>
-           <div className="text-center space-y-4">
-              <div className="flex justify-center">
-                 <div className="w-1.5 h-1.5 bg-gold rounded-full animate-ping" />
-              </div>
-              <h2 className="text-4xl font-black text-navy uppercase tracking-tighter">{t('review.scanning', lang)}</h2>
-              <p className="text-[10px] text-navy/30 font-black uppercase tracking-[0.3em] px-8 max-w-sm">{t('review.scanning_desc', lang)}</p>
+           <div className="text-center space-y-2">
+              <h2 className="text-xl font-bold text-navy">{t('review.scanning', lang)}</h2>
+              <p className="text-xs text-navy/40 font-bold uppercase tracking-widest px-8">{t('review.scanning_desc', lang)}</p>
            </div>
         </div>
       </Layout>
@@ -243,69 +179,50 @@ export const ReviewExtraction: React.FC<ScreenProps> = ({ onNext, onBack, user, 
   }
 
   return (
-    <Layout onBack={onBack} user={user} updateUser={updateUser}>
-      <div className="max-w-4xl mx-auto space-y-12">
-        <div className="flex flex-col md:flex-row justify-between items-end gap-8 border-b border-navy/5 pb-10">
-           <div className="space-y-4">
-              <div className="inline-flex items-center gap-2 px-3 py-1 bg-green-500/10 rounded-full">
-                 <Check className="w-3 h-3 text-green-500" />
-                 <span className="text-[10px] font-black uppercase tracking-widest text-green-600">{t('checklist.status_complete', lang)}</span>
-              </div>
-              <h1 className="text-5xl font-black text-navy uppercase tracking-tighter leading-none">{t('review.title', lang)}</h1>
-              <p className="text-xl text-navy/40 font-medium italic lowercase">{t('review.subtitle', lang)}</p>
-           </div>
-           <div className="bg-navy p-6 rounded-2xl text-white flex items-center gap-4 shadow-xl">
-              <Sparkles className="w-6 h-6 text-gold" />
-              <div>
-                 <p className="text-[8px] font-black uppercase tracking-widest text-white/40">{lang === 'es' ? 'Precisión IA' : 'AI Accuracy'}</p>
-                 <p className="text-lg font-black tracking-tighter uppercase">94.5%</p>
-              </div>
-           </div>
+    <Layout onBack={onBack} title={t('review.title', lang)} user={user} updateUser={updateUser}>
+      <div className="space-y-6 py-4">
+        <div className="space-y-2">
+          <div className="flex items-center gap-2">
+            <h2 className="text-2xl font-bold text-navy">{t('review.title', lang)}</h2>
+            <div className="bg-green-100 text-green-700 text-[10px] font-black px-2 py-0.5 rounded-full uppercase">{t('checklist.status_complete', lang)}</div>
+          </div>
+          <p className="text-navy/60 text-sm">{t('review.subtitle', lang)}</p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
-           <div className="md:col-span-2 space-y-6">
-              <Card className="divide-y divide-navy/5 p-0 overflow-hidden border-none shadow-premium">
-                {data.map((item) => (
-                  <div key={item.label} className="p-8 flex justify-between items-center group transition-colors hover:bg-navy/[0.01]">
-                    <div className="space-y-2">
-                      <div className="flex items-center gap-3">
-                        <span className="text-[10px] uppercase font-black tracking-[0.2em] text-navy/20">{item.label}</span>
-                        <span className={`text-[8px] font-black uppercase tracking-wider ${getConfidenceColor(item.confidence)}`}>
-                          {item.confidence < 90 && <AlertCircle className="w-2.5 h-2.5 inline mr-1" />}
-                          {item.confidence}% {t('review.match_suffix', lang)}
-                        </span>
-                      </div>
-                      <p className="text-2xl font-black text-navy tracking-tighter uppercase">{item.value}</p>
-                    </div>
-                    <button className="w-12 h-12 rounded-xl bg-navy/5 text-navy/20 hover:bg-gold hover:text-white transition-all flex items-center justify-center">
-                      <Edit2 className="w-5 h-5" />
-                    </button>
+        <div className="space-y-2">
+           <span className="text-[10px] font-black uppercase tracking-widest text-navy/30 ml-4">{t('review.fields_label', lang)}</span>
+           <Card className="divide-y divide-navy/5 p-0 overflow-hidden border-gold/20">
+            {data.map((item) => (
+              <div key={item.label} className="p-4 flex justify-between items-center group hover:bg-navy/[0.02]">
+                <div className="space-y-0.5">
+                  <div className="flex items-center gap-2">
+                    <span className="text-[10px] uppercase font-black tracking-widest text-navy/30">{item.label}</span>
+                    <span className={`text-[8px] font-bold ${getConfidenceColor(item.confidence)} flex items-center gap-1`}>
+                      {item.confidence < 90 && <AlertCircle className="w-2 h-2" />}
+                      {item.confidence}% {t('review.match_suffix', lang)}
+                    </span>
                   </div>
-                ))}
-              </Card>
-           </div>
-
-           <div className="space-y-8">
-              <Card className="p-8 bg-gold/5 border-gold/20 space-y-6">
-                 <h4 className="text-[10px] font-black uppercase tracking-[0.2em] text-gold">{lang === 'es' ? 'Sugerencias de IA' : 'AI Suggestions'}</h4>
-                 <div className="flex gap-4 items-start">
-                    <Sparkles className="w-6 h-6 text-gold shrink-0" />
-                    <p className="text-[11px] text-navy/60 leading-relaxed font-bold italic">
-                       "{t('review.tip', lang)}"
-                    </p>
-                 </div>
-              </Card>
-
-              <div className="space-y-4">
-                 <Button fullWidth size="lg" className="h-20 rounded-[2rem] shadow-premium text-lg font-black uppercase tracking-widest" onClick={() => onNext('DASHBOARD')}>
-                    <Check className="w-6 h-6 mr-3" /> {t('review.confirm_btn', lang)}
-                 </Button>
-                 <Button variant="ghost" fullWidth onClick={onBack} className="text-navy/30 font-black uppercase tracking-[0.2em] text-[10px]">
-                    {t('review.rescan_btn', lang)}
-                 </Button>
+                  <p className="font-bold text-navy tracking-tight">{item.value}</p>
+                </div>
+                <button className="p-2 text-navy/20 hover:text-gold transition-colors">
+                  <Edit2 className="w-4 h-4" />
+                </button>
               </div>
-           </div>
+            ))}
+           </Card>
+        </div>
+
+        <div className="pt-4 space-y-4">
+          <div className="bg-gold/5 border border-gold/10 p-4 rounded-2xl flex items-start gap-4">
+            <Sparkles className="w-5 h-5 text-gold shrink-0" />
+            <p className="text-[11px] text-navy/60 leading-relaxed italic">
+              "{t('review.tip', lang)}"
+            </p>
+          </div>
+          <Button fullWidth onClick={() => onNext('DASHBOARD')}>
+            <Check className="w-5 h-5 mr-2" /> {t('review.confirm_btn', lang)}
+          </Button>
+          <Button variant="ghost" fullWidth onClick={onBack}>{t('review.rescan_btn', lang)}</Button>
         </div>
       </div>
     </Layout>

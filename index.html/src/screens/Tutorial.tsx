@@ -7,8 +7,7 @@ import {
   MessagesSquare, 
   CheckCircle2, 
   ChevronRight, 
-  Sparkles,
-  Scale
+  Sparkles
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { t } from '../lib/translations';
@@ -22,28 +21,33 @@ interface ScreenProps {
 
 const TUTORIAL_STEPS: { 
   icon: React.ReactNode, 
-  titleKey: string, 
-  descKey: string 
+  titleKey: any, 
+  descKey: any 
 }[] = [
   {
-    icon: <Scale className="w-12 h-12 text-gold" />,
-    titleKey: 'help.step1_title',
-    descKey: 'help.step1_desc'
+    icon: <Sparkles className="w-12 h-12 text-gold" />,
+    titleKey: 'tutorial.welcome.title',
+    descKey: 'tutorial.welcome.desc'
+  },
+  {
+    icon: <Smartphone className="w-12 h-12 text-gold" />,
+    titleKey: 'tutorial.nav.title',
+    descKey: 'tutorial.nav.desc'
   },
   {
     icon: <Camera className="w-12 h-12 text-gold" />,
-    titleKey: 'help.step2_title',
-    descKey: 'help.step2_desc'
+    titleKey: 'tutorial.upload.title',
+    descKey: 'tutorial.upload.desc'
   },
   {
-    icon: <Sparkles className="w-12 h-12 text-gold" />,
-    titleKey: 'help.step3_title',
-    descKey: 'help.step3_desc'
+    icon: <MessagesSquare className="w-12 h-12 text-gold" />,
+    titleKey: 'tutorial.ai.title',
+    descKey: 'tutorial.ai.desc'
   },
   {
-    icon: <ChevronRight className="w-12 h-12 text-gold" />,
-    titleKey: 'help.step4_title',
-    descKey: 'help.step4_desc'
+    icon: <CheckCircle2 className="w-12 h-12 text-gold" />,
+    titleKey: 'tutorial.finish.title',
+    descKey: 'tutorial.finish.desc'
   }
 ];
 

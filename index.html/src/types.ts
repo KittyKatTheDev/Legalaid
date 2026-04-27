@@ -18,8 +18,6 @@ export type ScreenId =
   | 'NEXT_STEPS'
   | 'PREMIUM'
   | 'SUPPORT'
-  | 'TOOLS'
-  | 'JOURNEY'
   | 'INTERVIEW_SIMULATOR'
   | 'TUTORIAL'
   | 'KNOW_YOUR_RIGHTS'
@@ -37,13 +35,9 @@ export interface UserData {
   firstName: string;
   lastName: string;
   email: string;
-  language: 'en' | 'es' | 'mix';
+  language: 'en' | 'es' | 'mix' | 'other';
   caseType: string;
   isPremium: boolean;
   progress: number;
-  complexity?: 'Low' | 'High';
-  estimatedTimeline?: string;
-  caseFactors?: string[];
   isSimplifiedMode?: boolean;
-  isLoggedIn: boolean;
 }
